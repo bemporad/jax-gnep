@@ -27,10 +27,7 @@ where:
 - $\ell, u$ are local box constraints.
 
 A **generalized Nash equilibrium** $x^*$ is a vector where no agent can reduce their cost given the others' strategies and feasibility constraints, i.e.,
-
-$$ f_i(x^*_{i}, x^*_{-i})\leq f_i(x_i, x^*_{-i}) $$ 
-
-for all feasible $x=(x_i,x_{-i}^*)$, i.e.,
+$f_i(x^*_{i}, x^*_{-i})\leq f_i(x_i, x^*_{-i})$ for all feasible $x=(x_i,x_{-i}^*)$, i.e.,
 
 $$
 x_i^* \in \arg\min_{\ell_{i}\leq x_{i}\leq u_{i} \in \mathbb{R}^{n_{i}}} f_i(x)
