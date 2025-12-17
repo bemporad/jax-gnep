@@ -28,7 +28,7 @@ where:
 
 A **generalized Nash equilibrium** $x^*$ is a vector where no agent can reduce their cost given the others' strategies and feasibility constraints, i.e.,
 
-$$ f(x^*_{i},x^*_{-i})\leq f(x_i,x^*_{-i}) $$ 
+$$ f(x^{*}_{i},x^{*}_{-i})\leq f(x_i,x^{*}_{-i}) $$ 
 
 for all feasible $x=(x_i,x_{-i}^*)$, i.e.,
 
