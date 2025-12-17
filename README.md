@@ -28,8 +28,9 @@ where:
 
 A **generalized Nash equilibrium** $x^\star$ is a vector where no agent can reduce their cost given the others' strategies and feasibility constraints, i.e.,
 
+$$f_i(x^\star_{i}, x^\star_{-i})\leq f_i(x_i, x^\star_{-i})$$ 
 
-$f_i(x^\star_{i}, x^\star_{-i})\leq f_i(x_i, x^\star_{-i})$ for all feasible $x=(x_i,x_{-i}^\star)$, or equivalently, in terms of *best responses*, 
+for all feasible $x=(x_i,x_{-i}^\star)$, or equivalently, in terms of **best responses**: 
 
 $$
 x_i^\star \in \arg\min_{\ell_{i}\leq x_{i}\leq u_{i} \in \mathbb{R}^{n_{i}}} f_i(x)
