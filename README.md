@@ -214,7 +214,7 @@ x_star, lam_star, residual, opt = gnep.solve(x0)
 ```
 @misc{jax_gnep,
     author={A. Bemporad},
-    title={{jax-gnep -- A {KKT}-based Algorithm for Computing Generalized {Nash} Equilibria}},
+    title={{jax-gnep} -- A {KKT}-based Algorithm for Computing Generalized {Nash} Equilibria},
     howpublished = {\url{https://github.com/bemporad/jax-gnep}},
     year=2025
 }
