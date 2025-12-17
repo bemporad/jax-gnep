@@ -9,7 +9,7 @@ This repository includes a numerical solver to solve nonlinear **Generalized Nas
 We consider a game with $N$ agents. Each agent $i$ solves the following problem
 
 $$
-x_i^* \in \arg\min_{x_i \in \mathbb{R}^{n_i}} f_i(x)
+x_i^\star \in \arg\min_{x_i \in \mathbb{R}^{n_i}} f_i(x)
 $$
 
 subject to shared and local constraints
@@ -26,17 +26,17 @@ where:
 - $A, b$ define shared equality constraints;
 - $\ell, u$ are local box constraints.
 
-A **generalized Nash equilibrium** $x^*$ is a vector where no agent can reduce their cost given the others' strategies and feasibility constraints, i.e.,
+A **generalized Nash equilibrium** $x^\star$ is a vector where no agent can reduce their cost given the others' strategies and feasibility constraints, i.e.,
 
 
-$f_i(x^*_{i}, x^*_{-i})\leq f_i(x_i, x^*_{-i})$ for all feasible $x=(x_i,x_{-i}^*)$, or equivalently, in terms of *best responses*, 
-
-$$
-x_i^* \in \arg\min_{\ell_{i}\leq x_{i}\leq u_{i} \in \mathbb{R}^{n_{i}}} f_i(x)
-$$
+$f_i(x^\star_{i}, x^\star_{-i})\leq f_i(x_i, x^\star_{-i})$ for all feasible $x=(x_i,x_{-i}^\star)$, or equivalently, in terms of *best responses*, 
 
 $$
-\textrm{s.t.} \qquad g(x) \le 0, \qquad Ax = b, \qquad x_{-i}=x_{-i}^*.
+x_i^\star \in \arg\min_{\ell_{i}\leq x_{i}\leq u_{i} \in \mathbb{R}^{n_{i}}} f_i(x)
+$$
+
+$$
+\textrm{s.t.} \qquad g(x) \le 0, \qquad Ax = b, \qquad x_{-i}=x_{-i}^\star.
 $$
 
 
@@ -100,9 +100,9 @@ $$
 
 using the ``LevenbergMarquardt`` function in `jaxopt` and exploiting JAX's autodiff to evaluate Jacobians.
 
-After solving the nonlinear least-squares problem, if the residual $R(z^*)=0$, we can check if it indeeds is a GNE by computing the best responses of each agent
+After solving the nonlinear least-squares problem, if the residual $R(z^\star)=0$, we can check if it indeeds is a GNE by computing the best responses of each agent
 
-$$ \min_{\ell_i\leq x_i\leq u_i} f_i(x_i, x^*_{-i}) $$
+$$ \min_{\ell_i\leq x_i\leq u_i} f_i(x_i, x^\star_{-i}) $$
 
 $$ \textrm{s.t.} \qquad g_i(x), \qquad Ax=b$$
 
@@ -113,7 +113,7 @@ $$ \min_{x_i} f_i(x_i, x_{-i}) + \rho \left(\sum_j \max(g_i(x), 0)^2 + \|A x - b
             
 $$ \textrm{s.t.} \qquad \ell_i \leq x_i \leq u_i$$
 
-with $x_{-i}=x^*_{-i}$, where $\rho\gg 1$ is a large penalty on the violation of shared constraints.
+with $x_{-i}=x^\star_{-i}$, where $\rho\gg 1$ is a large penalty on the violation of shared constraints.
 
 ---
 
@@ -174,7 +174,7 @@ print(np.linalg.norm(residual))
 
 8.265311429442589e-14
 ```
-We can check if indeed $x^*$ is an equilibrium by evaluating the agents' best responses:
+We can check if indeed $x^\star$ is an equilibrium by evaluating the agents' best responses:
 
 ```python
 for i in range(gnep.N):
