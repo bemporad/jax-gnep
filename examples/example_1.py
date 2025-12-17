@@ -3,6 +3,8 @@ import jax
 import jax.numpy as jnp
 from jax_gnep import GNEP
 
+# Solve a GNEP with 3 agents:
+
 sizes = [2, 1, 1]      # [n1, n2, n3]
 
 # Agent 1 objective:
