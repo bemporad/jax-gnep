@@ -1,4 +1,4 @@
-# jax_gnep — A KKT-based Algorithm for Computing Generalized Nash Equilibria
+# jax-gnep — A KKT-based Algorithm for Computing Generalized Nash Equilibria
 
 This repository includes a numerical solver to solve nonlinear **Generalized Nash Equilibrium Problems (GNEPs)** based on **JAX**. The decision variables and Lagrange multipliers satisfying the KKT conditions jointly for all agents are determined by solving a nonlinear least-squares problem via a **Levenberg–Marquardt** method. If a zero residual is found, this corresponds to a potential generalized Nash equilibrium, a property that can be tested by evaluating the individual best responses. 
 
@@ -33,7 +33,7 @@ $$ f(x_i^*,x_{-i}^*)\leq f(x_i,x_{-i}^*) $$
 for all feasible $x=(x_i,x_{-i}^*)$, i.e.,
 
 $$
-x_i^* \in \arg\min_{\ell_i\leq x_i\leq u_i \in \mathbb{R}^{n_i}} f_i(x)
+x_i^* \in \arg\min_{\ell_{i}\leq x_{i}\leq u_{i} \in \mathbb{R}^{n_{i}}} f_i(x)
 $$
 
 $$
@@ -99,9 +99,11 @@ Therefore, the above KKT conditions can be rewritten as the nonlinear system of 
 $$R(z)=0$$
 
 where $z = (x, \{\lambda_i\}, \{\mu_i\}, \{v_i\}, \{y_i\})$.  To find a solution, we solve the nonlinear least-squares problem
+
 $$
    \min_z \frac{1}{2}\|R(z)\|^2
 $$
+
 using the ``LevenbergMarquardt`` function in `jaxopt` and exploiting JAX's autodiff to evaluate Jacobians.
 
 After solving the nonlinear least-squares problem, if the residual $R(z^*)=0$, we can check if it indeeds is a GNE by computing the best responses of each agent
