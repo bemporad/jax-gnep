@@ -3,6 +3,11 @@
 This repository includes a numerical solver to solve nonlinear **Generalized Nash Equilibrium Problems (GNEPs)** based on **JAX**. The decision variables and Lagrange multipliers satisfying the KKT conditions jointly for all agents are determined by solving a nonlinear least-squares problem via a **Levenberg–Marquardt** method. If a zero residual is found, this corresponds to a potential generalized Nash equilibrium, a property that can be tested by evaluating the individual best responses. 
 
 ---
+## Installation
+
+~~~python
+pip install jax-gnep
+~~~
 
 ## Overview
 
