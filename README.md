@@ -28,7 +28,7 @@ where:
 
 A **generalized Nash equilibrium** $x^*$ is a vector where no agent can reduce their cost given the others' strategies and feasibility constraints, i.e.,
 
-$$ f(x_i^*,x_{-i}^*)\leq f(x_i,x_{-i}^*) $$ 
+$$ f(x^*_{i},x^*_{-i})\leq f(x_i,x^*_{-i}) $$ 
 
 for all feasible $x=(x_i,x_{-i}^*)$, i.e.,
 
@@ -49,12 +49,7 @@ For each agent $i$, the necessary KKT conditions are:
 
 **1. Stationarity**
 
-$$
-\nabla_{x_i} f_i(x)
-+ \nabla_{x_i} g(x)^\top \lambda_i
-+ A_i^\top \mu_i
-- v_i + y_i = 0
-$$
+$$ \nabla_{x_i} f_i(x) + \nabla_{x_i} g(x)^\top \lambda_i + A_i^\top \mu_i - v_i + y_i = 0 $$
 
 **2. Primal Feasibility**
 
@@ -174,7 +169,7 @@ which gives the following solution:
 ```
 x* = [ 1.00000000e+00 -1.05289340e-14 -2.23603233e-14  5.00000000e-01]
 ```
-We can check if the KKT conditions are satisfied by looking at the residual $\|R(x)\|_2$:
+We can check if the KKT conditions are satisfied by looking at the residual $||R(x)||_2$:
 ```python
 print(np.linalg.norm(residual))
 
