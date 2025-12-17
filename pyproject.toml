@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jax-gnep"
+version = "0.1.0"
+authors = [
+  { name="Alberto Bemporad", email="alberto.bemporad@imtlucca.it" }
+]
+description = "jax_gnep — A KKT-based Algorithm for Computing Generalized Nash Equilibria."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["numpy","jax","jaxopt","scipy"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+keywords = ["generalized nash equilibrium problems", "game theory"]
+
+[project.urls]
+"Homepage" = "https://github.com/bemporad/jax-gnep"
