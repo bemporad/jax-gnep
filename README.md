@@ -106,7 +106,7 @@ $$
 
 using the ``LevenbergMarquardt`` function in `jaxopt` and exploiting JAX's autodiff to evaluate Jacobians.
 
-After solving the nonlinear least-squares problem, if the residual $R(z^\star)=0$, we can check if it indeeds is a GNE by computing the best responses of each agent
+After solving the nonlinear least-squares problem, if the residual $R(z^\star)=0$, we can check if indeed $x^\star$ is a GNE by computing the best responses of each agent
 
 $$ \min_{\ell_i\leq x_i\leq u_i} f_i(x_i, x^\star_{-i}) $$
 
