@@ -121,6 +121,9 @@ $$ \textrm{s.t.} \qquad \ell_i \leq x_i \leq u_i$$
 
 with $x_{-i}=x^\star_{-i}$, where $\rho\gg 1$ is a large penalty on the violation of shared constraints.
 
+*Variational GNEs* can be obtained by enforcing that the Lagrange multipliers associated with the
+shared constraints are the same for all players, i.e., by replacing $\{\lambda_i\}$ with a single vector $\lambda$ and $\{\mu_i\}$ with a single vector $\mu$, which further reduces the dimension of the zero-finding problem.
+
 ---
 
 ## References
@@ -208,6 +211,10 @@ You can also specify an initial guess $x_0$ to the GNEP solver as follows:
 x_star, lam_star, residual, opt = gnep.solve(x0)
 ```
 
+To compute a variational GNE solution:
+```python
+gnep = GNEP(sizes, f=[f1,f2,f3], g=g, ng=1, lb=lb, ub=ub, Aeq=Aeq, beq=beq, variational=True)
+```
 
 ### Citation
 
