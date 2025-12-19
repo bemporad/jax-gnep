@@ -211,9 +211,9 @@ You can also specify an initial guess $x_0$ to the GNEP solver as follows:
 x_star, lam_star, residual, opt = gnep.solve(x0)
 ```
 
-To compute a variational GNE solution:
+To compute a variational GNE solution, set flag `variational` = `True`:
 ```python
-gnep = GNEP(sizes, f=[f1,f2,f3], g=g, ng=1, lb=lb, ub=ub, Aeq=Aeq, beq=beq, variational=True)
+gnep = GNEP( ... , variational=True)
 ```
 
 ### Citation
