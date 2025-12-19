@@ -16,7 +16,7 @@ from jax_gnep import GNEP
 
 t0 = time.time()
 
-N = 20  # number of agents
+N = 10  # number of agents
 sizes = [1]*N  # n agents of dimension 1
 nvar = np.sum(sizes)
 
@@ -31,7 +31,7 @@ f = [partial(cost, i=i) for i in range(N)]
 lb = 7. * np.ones(nvar)
 ub = 100. * np.ones(nvar)
 
-gnep = GNEP(sizes, f=f, lb=lb, ub=ub)
+gnep = GNEP(sizes, f=f, lb=lb, ub=ub, variational=True)
 
 x0 = jnp.zeros(nvar)
 print("Solving GNEP with N =", N, "agents ... ", end="")
@@ -39,10 +39,10 @@ x_star, lam_star, residual, opt = gnep.solve(x0)
 print("done.")
 
 print("=== GNE solution ===")
-print(f"x = {np.array2string(x_star, precision=8)}")
+print(f"x = {np.array2string(x_star, precision=4)}")
 for i in range(gnep.N):
-    print(f"lambda[{i}] = {np.array2string(lam_star[i], precision=8)}")
-
+    print(f"lambda[{i}] = {np.array2string(lam_star[i], precision=2)}")
+    
 print(f"KKT residual norm = {float(jnp.linalg.norm(residual)): 10.7g}")
 print(f"LM iterations     = {int(opt.state.iter_num): 3d}")
 print(f"Elapsed time: {time.time() - t0: .2f} seconds")

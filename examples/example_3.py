@@ -40,9 +40,9 @@ x0 = jnp.zeros(nvar)
 x_star, lam_star, residual, opt = gnep.solve(x0)
 
 print("=== GNE solution ===")
-print(f"x = {np.array2string(x_star, precision=8)}")
+print(f"x = {np.array2string(x_star, precision=4)}")
 for i in range(gnep.N):
-    print(f"lambda[{i}] = {np.array2string(lam_star[i], precision=8)}")
+    print(f"lambda[{i}] = {np.array2string(lam_star[i], precision=2)}")
 
 print(f"KKT residual norm = {float(jnp.linalg.norm(residual)): 10.7g}")
 print(f"LM iterations     = {int(opt.state.iter_num): 3d}")

@@ -25,6 +25,7 @@ def f3(x):
 f=[f1,f2,f3]
 
 # Shared constraint:
+@jax.jit
 def g(x): 
     return jnp.array([x[3] + x[0] + x[2] - 2.0])
 
@@ -43,17 +44,17 @@ x0 = jnp.zeros(nvar)
 x_star, lam_star, residual, opt = gnep.solve(x0)
 
 print("=== GNE solution ===")
-print(f"x = {np.array2string(x_star, precision=8)}")
+print(f"x = {np.array2string(x_star, precision=4)}")
 for i in range(gnep.N):
-    print(f"lambda[{i}] = {np.array2string(lam_star[i], precision=8)}")
+    print(f"lambda[{i}] = {np.array2string(lam_star[i], precision=2)}")
 
 print(f"KKT residual norm = {float(jnp.linalg.norm(residual)): 10.7g}")
 print(f"LM iterations     = {int(opt.state.iter_num): 3d}")
 
 # check best responses of all agents at the computed GNE
 for i in range(gnep.N):
-    x_br, fbr_opt, iters = gnep.best_response(i, x_star)
-    print(f"\n=== Best response deviation of agent {i} at the computed GNE ===")
-    print(f"x_br = {np.array2string(x_br-x_star, precision=8)}")
-    print(f"fbr_opt = {fbr_opt: 10.7g}")
-    print(f"Best response iterations = {iters: 3d}")
+    x_br, fbr_opt, iters = gnep.best_response(i, x_star, rho=1e8)
+    print(f"Agent {i}'s BR at the GNE: ", end="")
+    print(f"|x_br-x_star| = {jnp.linalg.norm(x_br-x_star): 10.2g}", end="")
+    #print(f"fbr_opt = {fbr_opt: 10.7g}")
+    print(f" [{iters: 2d} L-BFGS-B iter(s)]")

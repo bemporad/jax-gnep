@@ -12,7 +12,7 @@ from jaxopt import LevenbergMarquardt, ScipyBoundedMinimize
 jax.config.update("jax_enable_x64", True)
 
 class GNEP():
-    def __init__(self, sizes, f, g=None, ng=None, lb=None, ub=None, Aeq=None, beq=None):
+    def __init__(self, sizes, f, g=None, ng=None, lb=None, ub=None, Aeq=None, beq=None, variational=False):
         """
         Generalized Nash Equilibrium Problem (GNEP) solver via Levenberg-Marquardt method.
         
@@ -26,7 +26,7 @@ class GNEP():
         
         The residuals of the KKT optimality conditions of all agents are minimized jointly as a 
         nonlinear least-squares problem, solved via a Levenberg-Marquardt method. Strict complementarity
-        is enforced via the Fischer–Burmeister NCP function.
+        is enforced via the Fischer–Burmeister NCP function. Variational GNEs are also supported by simply imposing equal Lagrange multipliers.
                 
         Parameters:
         -----------
@@ -46,6 +46,8 @@ class GNEP():
             Equality constraint matrix. If None, no equality constraints are applied.
         beq : array-like, optional
             Equality constraint vector. If None, no equality constraints are applied.
+        variational : bool, optional
+            If True, solve for a variational GNE by imposing equal Lagrange multipliers.
             
         (C) 2025 Alberto Bemporad
         """
@@ -111,13 +113,32 @@ class GNEP():
             self.neq = 0
         self.has_eq = self.neq > 0
         self.has_constraints = any(self.is_bounded) or (self.ng>0) or self.has_eq
+
+        if variational:
+            if self.ng ==0 and self.neq ==0:
+                print("\033[1;31mVariational GNE requested but no shared constraints are defined.\033[0m")
+                variational = False
+        self.variational = variational
+
+        n_shared = self.ng + self.neq 
+        self.nlam = [int(self.nlb[i] + self.nub[i] + n_shared) for i in range(self.N)]  # Number of multipliers per agent           
         
-        self.nlam = [int(self.nlb[i] + self.nub[i] + self.ng + self.neq) for i in range(self.N)]
-        self.ncon = sum(self.nlam)
-
-        self.i2_lam = np.cumsum(self.nlam)
-        self.i1_lam = np.hstack((0, self.i2_lam[:-1]))
-
+        if not variational:
+            self.nlam_sum = sum(self.nlam) # total number of multipliers
+            i2_lam = np.cumsum(self.nlam)
+            i1_lam = np.hstack((0, i2_lam[:-1]))
+            self.ii_lam = [np.arange(i1_lam[i], i2_lam[i], dtype=int) for i in range(self.N)] # indices of multipliers for each agent            
+        else:
+            # all agents have the same multipliers for shared constraints
+            self.ii_lam = []
+            j = n_shared
+            for i in range(self.N):
+                self.ii_lam.append(np.hstack((np.arange(self.ng, dtype=int), # shared inequality-multipliers
+                    np.arange(j, j + self.nlb[i] + self.nub[i], dtype=int), # agent-specific box multipliers
+                    np.arange(self.ng, self.ng + self.neq, dtype=int)))) # shared equality-multipliers
+                j += self.nlb[i] + self.nub[i]
+            self.nlam_sum = n_shared + sum([self.nlb[i] + self.nub[i] for i in range(self.N)])
+            
         # Gradients of agents' objectives
         self.df = [
             jax.jit(
@@ -134,8 +155,7 @@ class GNEP():
         if self.ng>0:
             self.g  = jax.jit(self.g)
             self.dg = jax.jit(jax.jacobian(self.g))
-
-                    
+        
     def _kkt_residual_impl(self, z):
         # pure JAX implementation, used inside JIT
         x   = z[:self.nvar]
@@ -169,7 +189,7 @@ class GNEP():
                 zero = jnp.zeros(self.sizes[i])
             if is_bounded[i] or ng>0 or neq>0: # we have inequality constraints
                 nlam_i = self.nlam[i]
-                lam_i = lam[self.i1_lam[i]:self.i2_lam[i]]
+                lam_i = lam[self.ii_lam[i]]
 
             # 1st KKT condition
             res_1st = self.df[i](x[i1:i2], x)
@@ -266,12 +286,12 @@ class GNEP():
             x0 = jnp.asarray(x0)            
         
         if self.has_constraints:
-            lam0 = 0.1 * jnp.ones(self.ncon)
+            lam0 = 0.1 * jnp.ones(self.nlam_sum)
             z0   = jnp.hstack((x0, lam0))
         else:           
             z0   = x0
 
-        # First call pays compilation; subsequent calls are much faster
+        # First call pays compilation, subsequent calls are much faster
         opt    = self._lm_run(z0)
         z_star = opt.params
         x = z_star[:self.nvar]
@@ -279,21 +299,32 @@ class GNEP():
         if self.has_constraints:
             lam_star = z_star[self.nvar:]
             for i in range(self.N):
-                i1 = self.i1_lam[i]
-                i2 = self.i2_lam[i]
-                lam.append(np.asarray(lam_star[i1:i2]))
+                lam.append(np.asarray(lam_star[self.ii_lam[i]]))
         #res = self._kkt_residual_jit(z_star)
         res = opt.state.residual
 
         return np.asarray(x), lam, np.asarray(res), opt
 
-    def best_response(self, i, x, rho=1e4, maxiter=200):
+    def best_response(self, i, x, rho=1e5, maxiter=200, tol=1e-8):
         """
         Compute best response for agent i via SciPy L-BFGS-B:
 
             min_{x_i} f_i(x_i, x_{-i}) + rho * (sum_j max(g_i(x), 0)^2 + ||Aeq x - beq||^2)
             s.t. lb_i <= x_i <= ub_i
 
+        Parameters:
+        -----------
+        i : int
+            Index of the agent for which to compute the best response.
+        x : array-like
+            Current joint strategy of all agents.
+        rho : float, optional
+            Penalty parameter for constraint violations.
+        maxiter : int, optional
+            Maximum number of L-BFGS-B iterations.
+        tol : float, optional
+            Tolerance used in L-BFGS-B optimization.
+            
         Returns:
         x_i     : best response of agent i
         res     : SciPy optimize result
@@ -309,19 +340,19 @@ class GNEP():
             x_i = x.at[i1:i2].set(xi)
             f = jnp.array(self.f[i](x_i)).reshape(-1)
             if self.ng > 0:
-                f += rho*jnp.maximum(self.g(x_i), 0.0)**2
+                f += rho*jnp.sum(jnp.maximum(self.g(x_i), 0.0)**2)
             if self.neq > 0:
-                f += rho*jnp.linalg.norm(self.Aeq @ x_i - self.beq)**2
+                f += rho*jnp.sum((self.Aeq @ x_i - self.beq)**2)
             return f[0]
 
         li = self.lb[i1:i2]
         ui = self.ub[i1:i2]
         
-        options = {'iprint': -1, 'maxls': 20, 'gtol': 1.e-8, 'eps': 1.e-8,
-               'ftol': 1.e-8, 'maxfun': maxiter, 'maxcor': 10}
+        options = {'iprint': -1, 'maxls': 20, 'gtol': tol, 'eps': tol,
+               'ftol': tol, 'maxfun': maxiter, 'maxcor': 10}
     
         solver = ScipyBoundedMinimize(
-                fun=fun, tol=1.e-8, method="L-BFGS-B", maxiter=maxiter, options=options)
+                fun=fun, tol=tol, method="L-BFGS-B", maxiter=maxiter, options=options)
         xi, state = solver.run(x[i1:i2], bounds=(li, ui))
         x_new = np.asarray(x.at[i1:i2].set(xi))
         fi_opt = self.f[i](x_new)
