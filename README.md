@@ -1,6 +1,6 @@
 # jax-gnep — A KKT-based Algorithm for Computing Generalized Nash Equilibria
 
-This repository is no longer maintained, as it is now part of <a href="https://github.com/bemporad/nashopt"> `nashopt`</a>.
+This repository is no longer maintained, as it is now part of <a href="https://github.com/bemporad/nashopt">nashopt</a>.
 
 ~~~python
 pip install nashopt
